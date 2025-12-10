@@ -24,7 +24,7 @@ const (
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 */
-func Img2Pdf(files []string, dst string, rotate int) error {
+func Img2Pdf(files []string, dst string, rotate float64) error {
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
@@ -124,7 +124,7 @@ func Img2Pdf(files []string, dst string, rotate int) error {
 			centerX := x + drawW/2
 			centerY := y + drawH/2
 			// 逆时针旋转90度
-			pdf.TransformRotate(float64(rotate), centerX, centerY)
+			pdf.TransformRotate(rotate, centerX, centerY)
 			// 绘制图片（注意：旋转后需要交换宽高）
 			pdf.ImageOptions(imgPath, x, y, drawW, drawH, false, gofpdf.ImageOptions{
 				ReadDpi: true,

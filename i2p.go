@@ -15,14 +15,16 @@ import (
 const (
 	DPI = 200
 )
-const(
-	CLOCKWISE = 90 //顺时针旋转90度
-	COUNTERCLOCKWISE = -90 //逆时针旋转90度
-) 
+const (
+	CLOCKWISE        float64 = 90 //顺时针旋转90度
+	KEEP             float64 = 0
+	COUNTERCLOCKWISE float64 = -90 //逆时针旋转90度
+)
+
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 */
-func Img2Pdf(files []string, dst string,rotate int) error {
+func Img2Pdf(files []string, dst string, rotate int) error {
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
@@ -80,7 +82,7 @@ func Img2Pdf(files []string, dst string,rotate int) error {
 
 		// 居中显示图片，保持纵横比，不拉伸变形
 		margin := 10.0 // 10mm 边距
-		
+
 		// 根据是否需要旋转来计算可用空间
 		var availableW, availableH float64
 		if needsRotation {
@@ -139,7 +141,7 @@ func Img2Pdf(files []string, dst string,rotate int) error {
 	// 保存 PDF
 	err := pdf.OutputFileAndClose(dst)
 	if err != nil {
-		return fmt.Errorf("保存 PDF 失败:", err)
+		return fmt.Errorf("保存 PDF 失败:%v", err)
 	}
 
 	fmt.Printf("已生成 %s\t共%d页\n", dst, len(files))

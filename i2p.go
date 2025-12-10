@@ -22,7 +22,7 @@ const (
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 */
-func Img2Pdf(files []string, dst string) {
+func Img2Pdf(files []string, dst string) (error) {
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
@@ -87,8 +87,9 @@ func Img2Pdf(files []string, dst string) {
 	// 保存 PDF
 	err := pdf.OutputFileAndClose(dst)
 	if err != nil {
-		log.Fatal("保存 PDF 失败:", err)
+		return fmt.Errorf("保存 PDF 失败:", err)
 	}
 
-	fmt.Printf("已生成 %s/%d\n", dst, len(files))
+	fmt.Printf("已生成 %s\t共%d页\n", dst, len(files))
+	return nil
 }

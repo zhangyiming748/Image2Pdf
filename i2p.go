@@ -16,8 +16,8 @@ const (
 	DPI = 200
 )
 const(
-	clockwise = 90 //顺时针旋转90度
-	counterclockwise = -90 //逆时针旋转90度
+	CLOCKWISE = 90 //顺时针旋转90度
+	COUNTERCLOCKWISE = -90 //逆时针旋转90度
 ) 
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件

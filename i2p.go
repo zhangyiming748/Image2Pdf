@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DPI float64 = 200
+	DPI float64 = 600
 )
 const (
 	CLOCKWISE        float64 = 90  //顺时针旋转90度

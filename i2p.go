@@ -72,10 +72,9 @@ func Img2Pdf(files []string, dst string, rotate float64) error {
 		// 总是使用纵向页面
 		pdf.AddPage()
 
-		// 居中显示图片，保持纵横比，不拉伸变形
-		margin := 10.0 // 10mm 边距
-		availableW := pageW - 2*margin
-		availableH := pageH - 2*margin
+		// 显示图片，保持纵横比，不拉伸变形，无边距
+		availableW := pageW
+		availableH := pageH
 
 		// 计算缩放比例以保持纵横比
 		scaleW := availableW / widthMM

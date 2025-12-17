@@ -66,21 +66,19 @@ func Img2Pdf(files []string, dst string, rotate float64) error {
 		widthMM := widthPx * 25.4 / DPI
 		heightMM := heightPx * 25.4 / DPI
 
-		// A4 页面尺寸 210×297 mm
-		pageW, pageH := pdf.GetPageSize()
-
 		// 总是使用纵向页面
 		pdf.AddPage()
 
-		// 显示图片，保持纵横比，不拉伸变形，无边距
-		availableW := pageW
-		availableH := pageH
+		// A4 页面尺寸 210×297 mm
+		pageW, pageH := pdf.GetPageSize()
 
-		// 计算缩放比例以保持纵横比
-		scaleW := availableW / widthMM
-		scaleH := availableH / heightMM
+		// 计算缩放比例以保持纵横比，但至少填满宽度或高度
+		scaleW := pageW / widthMM
+		scaleH := pageH / heightMM
+		
+		// 使用较大的缩放比例，确保至少一边填满页面
 		scale := scaleW
-		if scaleH < scaleW {
+		if scaleH > scaleW {
 			scale = scaleH
 		}
 
@@ -88,7 +86,7 @@ func Img2Pdf(files []string, dst string, rotate float64) error {
 		drawW := widthMM * scale
 		drawH := heightMM * scale
 
-		// 计算居中位置
+		// 计算居中位置（可能有负值，但不影响显示）
 		x := (pageW - drawW) / 2
 		y := (pageH - drawH) / 2
 

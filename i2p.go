@@ -221,7 +221,9 @@ func Img2PdfInFolder(srtDir string, rotate float64) error {
 	pathParts := strings.Split(srtDir, string(os.PathSeparator))
 	lastIndex := len(pathParts) - 1
 	folderName := pathParts[lastIndex]
-	pdfName := strings.Join([]string{folderName, "pdf"}, ".")
+	pageNum := len(imgFiles)
+	page := fmt.Sprintf("共%d页", pageNum)
+	pdfName := strings.Join([]string{folderName, page, ".pdf"}, "")
 	dst := strings.Join([]string{srtDir, pdfName}, string(os.PathSeparator))
 	// 保存 PDF
 	err := pdf.OutputFileAndClose(dst)

@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
+	"Image2Pdf/core"
 	"github.com/spf13/cobra"
-	 "Image2Pdf/core"
 )
 
 func init() {
@@ -42,7 +42,7 @@ var multiCmd = &cobra.Command{
 		if root == "" {
 			log.Fatal("请提供根目录路径参数 -r 或 --root")
 		}
-	core.Img2PdfInRoot(root)
+		core.Img2PdfInRoot(root)
 	},
 }
 

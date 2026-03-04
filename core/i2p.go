@@ -47,11 +47,17 @@ func Img2Pdf(files []string, dst string) {
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
-
-	//magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
-
-	args := []string{"convert"}
+	/*
+	执行
+	magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
+	会警告
+	WARNING: The convert command is deprecated in IMv7, use "magick" instead of "convert" or "magick convert"
+	优化成
+	magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
+	*/
+	var args []string
 	args = append(args, files...)
+	args = append(args, "-compress", "None")
 	args = append(args, dst)
 	cmd := exec.Command("magick", args...)
 	log.Printf("执行命令:%v\n", cmd.String())

@@ -12,8 +12,7 @@ func init() {
 }
 
 var (
-	dir  string
-	root string
+	dir string
 )
 
 var rootCmd = &cobra.Command{
@@ -39,10 +38,10 @@ var multiCmd = &cobra.Command{
 	Short: "将根目录下的多个子文件夹分别转换为 PDF 文件",
 	Long:  "给定一个根文件夹的绝对路径，该路径下包含多个子文件夹，每个子文件夹下的图片会分别转换成 PDF 文件",
 	Run: func(cmd *cobra.Command, args []string) {
-		if root == "" {
-			log.Fatal("请提供根目录路径参数 -r 或 --root")
+		if dir == "" {
+			log.Fatal("请提供根目录路径参数 -d 或 --dir")
 		}
-		core.Img2PdfInRoot(root)
+		core.Img2PdfInRoot(dir)
 	},
 }
 
@@ -52,8 +51,8 @@ func init() {
 	singleCmd.MarkFlagRequired("dir")
 
 	// multi 命令的参数
-	multiCmd.Flags().StringVarP(&root, "root", "r", "", "包含多个子文件夹的根目录绝对路径")
-	multiCmd.MarkFlagRequired("root")
+	multiCmd.Flags().StringVarP(&dir, "dir", "d", "", "包含多个子文件夹的根目录绝对路径")
+	multiCmd.MarkFlagRequired("dir")
 
 	// 将子命令添加到根命令
 	rootCmd.AddCommand(singleCmd)

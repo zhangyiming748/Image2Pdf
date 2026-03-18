@@ -1,10 +1,10 @@
 module Image2Pdf
 
-go 1.26.0
+go 1.26.1
 
 require (
 	github.com/spf13/cobra v1.10.2
-	github.com/zhangyiming748/finder v0.0.7
+	github.com/zhangyiming748/finder v0.0.8
 )
 
 require (

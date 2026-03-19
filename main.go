@@ -12,7 +12,8 @@ func init() {
 }
 
 var (
-	dir string
+	dir      string
+	compress string
 )
 
 var rootCmd = &cobra.Command{
@@ -29,7 +30,11 @@ var singleCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供文件夹路径参数 -d 或 --dir")
 		}
-		core.Img2PdfInFolder(dir)
+		compressValue := true // 默认为 true
+		if compress == "n" || compress == "N" {
+			compressValue = false
+		}
+		core.Img2PdfInFolder(dir, compressValue)
 	},
 }
 
@@ -41,17 +46,23 @@ var multiCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供根目录路径参数 -d 或 --dir")
 		}
-		core.Img2PdfInRoot(dir)
+		compressValue := true // 默认为 true
+		if compress == "n" || compress == "N" {
+			compressValue = false
+		}
+		core.Img2PdfInRoot(dir, compressValue)
 	},
 }
 
 func init() {
 	// single 命令的参数
 	singleCmd.Flags().StringVarP(&dir, "dir", "d", "", "包含图片的文件夹绝对路径")
+	singleCmd.Flags().StringVarP(&compress, "compress", "c", "y", "是否启用压缩以减小 PDF 文件大小 (y/n, 默认 y)")
 	singleCmd.MarkFlagRequired("dir")
 
 	// multi 命令的参数
 	multiCmd.Flags().StringVarP(&dir, "dir", "d", "", "包含多个子文件夹的根目录绝对路径")
+	multiCmd.Flags().StringVarP(&compress, "compress", "c", "y", "是否启用压缩以减小 PDF 文件大小 (y/n, 默认 y)")
 	multiCmd.MarkFlagRequired("dir")
 
 	// 将子命令添加到根命令

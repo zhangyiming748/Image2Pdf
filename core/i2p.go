@@ -43,21 +43,26 @@ func init() {
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
 */
-func Img2Pdf(files []string, dst string) {
+func Img2Pdf(files []string, dst string, compress bool) {
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
 	/*
-	执行
-	magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
-	会警告
-	WARNING: The convert command is deprecated in IMv7, use "magick" instead of "convert" or "magick convert"
-	优化成
-	magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
+		执行
+		magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
+		会警告
+		WARNING: The convert command is deprecated in IMv7, use "magick" instead of "convert" or "magick convert"
+		优化成
+		magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
 	*/
 	var args []string
 	args = append(args, files...)
-	args = append(args, "-compress", "None")
+	if compress {
+		args = append(args, "-quality", "85")
+		args = append(args, "-compress", "JPEG")
+	} else {
+		args = append(args, "-compress", "None")
+	}
 	args = append(args, dst)
 	cmd := exec.Command("magick", args...)
 	log.Printf("执行命令:%v\n", cmd.String())
@@ -74,7 +79,7 @@ func Img2Pdf(files []string, dst string) {
 路径下包含的全部图片文件转换成一个pdf文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInFolder(srtDir string) {
+func Img2PdfInFolder(srtDir string, compress bool) {
 	imgFiles := finder.FindAllImagesInRoot(srtDir)
 	if len(imgFiles) == 0 {
 		log.Println("没有找到图片文件!")
@@ -86,19 +91,19 @@ func Img2PdfInFolder(srtDir string) {
 	pdfName := strings.Join([]string{baseName, "pdf"}, ".")
 	pdfPath := filepath.Join(srtDir, pdfName)
 	log.Printf("作为生成pdf的文件名:%v\n", pdfPath)
-	Img2Pdf(imgFiles, pdfPath)
+	Img2Pdf(imgFiles, pdfPath, compress)
 }
 
 /*
 给定一个根文件夹的绝对路径
 路径下包含多个子文件夹
 每个子文件夹下是同一组图片
-全部图片文件转换成一个pdf文件
+全部图片文件转换成一个 pdf 文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInRoot(root string) {
+func Img2PdfInRoot(root string, compress bool) {
 	folders := finder.FindAllFolders(root)
 	for _, folder := range folders {
-		Img2PdfInFolder(folder)
+		Img2PdfInFolder(folder, compress)
 	}
 }

@@ -48,7 +48,7 @@ func Pdf2ImgInFolder(pdf string) {
 
 	// 使用 ImageMagick 将 PDF 转换为图片
 	// magick -density 600 input.pdf output.png
-	outputPattern := filepath.Join(filepath.Dir(pdfFile), "Scan_%d.png")
+	outputPattern := filepath.Join(filepath.Dir(pdfFile), "Scan_%d.jpg")
 	args := []string{}
 	args = append(args, "-density", "300")
 	args = append(args, pdfFile)

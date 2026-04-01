@@ -73,33 +73,26 @@ func Pdf2ImgInFolder(pdf string) {
 }
 
 func checkGhostscript() (string, error) {
-	var candidates []string
-
 	switch runtime.GOOS {
 	case "windows":
 		// Windows 通常是 gswin64c.exe（推荐控制台版），也可以尝试 gs.exe（部分安装会有）
-		candidates = []string{"gswin64c.exe", "gswin32c.exe", "gs.exe"}
+		if out,err:=getGhostscriptVersion("gswin64c.exe"); err == nil {
+			return out, nil
+		}else{
+			fmt.Printf("未找到 Ghostscript。请先安装 Ghostscript 并确保它在 PATH 中")
+			return out,err
+		}
 	case "darwin", "linux":
 		// macOS 和 Linux 统一使用 gs
-		candidates = []string{"gs"}
+		if out,err:=getGhostscriptVersion("gs"); err == nil {
+			return out, nil
+		}else{
+			fmt.Printf("未找到 Ghostscript。请先安装 Ghostscript 并确保它在 PATH 中")
+			return out,err
+		}
 	default:
 		return "", fmt.Errorf("不支持的操作系统: %s", runtime.GOOS)
 	}
-
-	for _, name := range candidates {
-		if path, err := exec.LookPath(name); err == nil {
-			// 额外验证：尝试获取版本号，确保真的是 Ghostscript
-			if version, err := getGhostscriptVersion(name); err == nil {
-				fmt.Printf("找到 Ghostscript: %s (版本: %s)\n", path, version)
-				return path, nil
-			}
-			// 如果版本命令失败，也算找到（但不推荐直接用）
-			fmt.Printf("找到 Ghostscript 可执行文件: %s\n", path)
-			return path, nil
-		}
-	}
-
-	return "", fmt.Errorf("未找到 Ghostscript。请先安装 Ghostscript 并确保它在 PATH 中")
 }
 
 // 获取 Ghostscript 版本（推荐额外验证）

@@ -14,6 +14,7 @@ import (
 func Pdf2Img(root string) {
 	path, err := checkGhostscript()
 	if err != nil {
+		fmt.Printf("未找到 Ghostscript。请先安装 Ghostscript https://www.ghostscript.com/releases/gsdnld.html 并确保它在 PATH 中")
 		log.Fatal(err)
 	}
 	fmt.Println("Ghostscript 路径可用:", path)

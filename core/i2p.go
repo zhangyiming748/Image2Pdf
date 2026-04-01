@@ -63,6 +63,7 @@ func Img2Pdf(files []string, dst string, compress bool) {
 	} else {
 		args = append(args, "-compress", "None")
 	}
+	args = append(args, "-auto-orient")
 	args = append(args, dst)
 	cmd := exec.Command("magick", args...)
 	log.Printf("执行命令:%v\n", cmd.String())

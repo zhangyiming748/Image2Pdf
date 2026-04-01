@@ -76,19 +76,19 @@ func checkGhostscript() (string, error) {
 	switch runtime.GOOS {
 	case "windows":
 		// Windows 通常是 gswin64c.exe（推荐控制台版），也可以尝试 gs.exe（部分安装会有）
-		if out,err:=getGhostscriptVersion("gswin64c.exe"); err == nil {
+		if out, err := getGhostscriptVersion("gswin64c.exe"); err == nil {
 			return out, nil
-		}else{
+		} else {
 			fmt.Printf("未找到 Ghostscript。请先安装 Ghostscript 并确保它在 PATH 中")
-			return out,err
+			return out, err
 		}
 	case "darwin", "linux":
 		// macOS 和 Linux 统一使用 gs
-		if out,err:=getGhostscriptVersion("gs"); err == nil {
+		if out, err := getGhostscriptVersion("gs"); err == nil {
 			return out, nil
-		}else{
+		} else {
 			fmt.Printf("未找到 Ghostscript。请先安装 Ghostscript 并确保它在 PATH 中")
-			return out,err
+			return out, err
 		}
 	default:
 		return "", fmt.Errorf("不支持的操作系统: %s", runtime.GOOS)

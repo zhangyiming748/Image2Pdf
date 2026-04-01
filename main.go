@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"Image2Pdf/core"
+	"Image2Pdf/decode"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +14,7 @@ func init() {
 
 var (
 	dir      string
-	compress string
+	compress bool
 )
 
 var rootCmd = &cobra.Command{
@@ -30,11 +31,7 @@ var singleCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供文件夹路径参数 -d 或 --dir")
 		}
-		compressValue := true // 默认为 true
-		if compress == "n" || compress == "N" {
-			compressValue = false
-		}
-		core.Img2PdfInFolder(dir, compressValue)
+		core.Img2PdfInFolder(dir, compress)
 	},
 }
 
@@ -46,28 +43,70 @@ var multiCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供根目录路径参数 -d 或 --dir")
 		}
-		compressValue := true // 默认为 true
-		if compress == "n" || compress == "N" {
-			compressValue = false
+		core.Img2PdfInRoot(dir, compress)
+	},
+}
+
+var decodeCmd = &cobra.Command{
+	Use:   "decode",
+	Short: "将 PDF 文件解码为图片",
+	Long:  "给定一个根目录路径，将该目录下所有包含 PDF 的文件夹中的 PDF 文件转换为图片，并保存到同一文件夹下",
+	Run: func(cmd *cobra.Command, args []string) {
+		if dir == "" {
+			log.Fatal("请提供根目录路径参数 -d 或 --dir")
 		}
-		core.Img2PdfInRoot(dir, compressValue)
+		decode.Pdf2Img(dir)
 	},
 }
 
 func init() {
 	// single 命令的参数
-	singleCmd.Flags().StringVarP(&dir, "dir", "d", "", "包含图片的文件夹绝对路径")
-	singleCmd.Flags().StringVarP(&compress, "compress", "c", "y", "是否启用压缩以减小 PDF 文件大小 (y/n, 默认 y)")
+	singleCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含图片的文件夹绝对路径")
+	singleCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
 	singleCmd.MarkFlagRequired("dir")
+	/*
+	# 启用压缩（默认）
+	./Image2Pdf single -d /path/to/images
+	./Image2Pdf single -d /path/to/images -c
+
+	# 禁用压缩
+	./Image2Pdf single -d /path/to/images -c=false
+	# 或
+	./Image2Pdf single -d /path/to/images --compress=false
+	*/
 
 	// multi 命令的参数
-	multiCmd.Flags().StringVarP(&dir, "dir", "d", "", "包含多个子文件夹的根目录绝对路径")
-	multiCmd.Flags().StringVarP(&compress, "compress", "c", "y", "是否启用压缩以减小 PDF 文件大小 (y/n, 默认 y)")
+	multiCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含多个子文件夹的根目录绝对路径")
+	multiCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
 	multiCmd.MarkFlagRequired("dir")
+	/*
+	# 启用压缩（默认）
+	./Image2Pdf multi -d /path/to/root
+	./Image2Pdf multi -d /path/to/root -c
+
+	# 禁用压缩
+	./Image2Pdf multi -d /path/to/root -c=false
+	# 或
+	./Image2Pdf multi -d /path/to/root --compress=false
+	*/
+
+	// decode 命令的参数
+	decodeCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含 PDF 文件的根目录绝对路径（默认为当前目录）")
+	/*
+	# 使用默认值（当前目录）
+	./Image2Pdf decode
+
+	# 指定目录
+	./Image2Pdf decode -d /path/to/pdf/folder
+
+	# 或使用长格式
+	./Image2Pdf decode --dir /path/to/pdf/folder
+	*/
 
 	// 将子命令添加到根命令
 	rootCmd.AddCommand(singleCmd)
 	rootCmd.AddCommand(multiCmd)
+	rootCmd.AddCommand(decodeCmd)
 }
 
 func main() {

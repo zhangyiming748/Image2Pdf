@@ -88,7 +88,7 @@ func Img2PdfInFolder(srtDir string, compress bool) {
 	}
 	log.Printf("找到的图片文件:%v\n", imgFiles)
 	baseName := filepath.Base(srtDir)
-	baseName = fmt.Sprintf("%v 共%v页", baseName, len(imgFiles))
+	//baseName = fmt.Sprintf("%v 共%v页", baseName, len(imgFiles))
 	pdfName := strings.Join([]string{baseName, "pdf"}, ".")
 	pdfPath := filepath.Join(srtDir, pdfName)
 	log.Printf("作为生成pdf的文件名:%v\n", pdfPath)

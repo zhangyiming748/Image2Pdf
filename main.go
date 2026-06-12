@@ -5,6 +5,7 @@ import (
 
 	"Image2Pdf/core"
 	"Image2Pdf/decode"
+
 	"github.com/spf13/cobra"
 )
 
@@ -15,12 +16,14 @@ func init() {
 var (
 	dir      string
 	compress bool
+	version  = "dev" // 默认版本号,构建时通过 -ldflags 注入
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "image2pdf",
-	Short: "图片转 PDF 工具",
-	Long:  "Image2Pdf 是一个用于将一组图片合并生成单个 PDF 文件的命令行工具",
+	Use:     "image2pdf",
+	Short:   "图片转 PDF 工具",
+	Long:    "Image2Pdf 是一个用于将一组图片合并生成单个 PDF 文件的命令行工具",
+	Version: version,
 }
 
 var singleCmd = &cobra.Command{
@@ -65,14 +68,14 @@ func init() {
 	singleCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
 	singleCmd.MarkFlagRequired("dir")
 	/*
-	# 启用压缩（默认）
-	./Image2Pdf single -d /path/to/images
-	./Image2Pdf single -d /path/to/images -c
+		# 启用压缩（默认）
+		./Image2Pdf single -d /path/to/images
+		./Image2Pdf single -d /path/to/images -c
 
-	# 禁用压缩
-	./Image2Pdf single -d /path/to/images -c=false
-	# 或
-	./Image2Pdf single -d /path/to/images --compress=false
+		# 禁用压缩
+		./Image2Pdf single -d /path/to/images -c=false
+		# 或
+		./Image2Pdf single -d /path/to/images --compress=false
 	*/
 
 	// multi 命令的参数
@@ -80,33 +83,43 @@ func init() {
 	multiCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
 	multiCmd.MarkFlagRequired("dir")
 	/*
-	# 启用压缩（默认）
-	./Image2Pdf multi -d /path/to/root
-	./Image2Pdf multi -d /path/to/root -c
+		# 启用压缩（默认）
+		./Image2Pdf multi -d /path/to/root
+		./Image2Pdf multi -d /path/to/root -c
 
-	# 禁用压缩
-	./Image2Pdf multi -d /path/to/root -c=false
-	# 或
-	./Image2Pdf multi -d /path/to/root --compress=false
+		# 禁用压缩
+		./Image2Pdf multi -d /path/to/root -c=false
+		# 或
+		./Image2Pdf multi -d /path/to/root --compress=false
 	*/
 
 	// decode 命令的参数
 	decodeCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含 PDF 文件的根目录绝对路径（默认为当前目录）")
 	/*
-	# 使用默认值（当前目录）
-	./Image2Pdf decode
+		# 使用默认值（当前目录）
+		./Image2Pdf decode
 
-	# 指定目录
-	./Image2Pdf decode -d /path/to/pdf/folder
+		# 指定目录
+		./Image2Pdf decode -d /path/to/pdf/folder
 
-	# 或使用长格式
-	./Image2Pdf decode --dir /path/to/pdf/folder
+		# 或使用长格式
+		./Image2Pdf decode --dir /path/to/pdf/folder
 	*/
 
 	// 将子命令添加到根命令
 	rootCmd.AddCommand(singleCmd)
 	rootCmd.AddCommand(multiCmd)
 	rootCmd.AddCommand(decodeCmd)
+	rootCmd.AddCommand(versionCmd)
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "显示版本信息",
+	Long:  "显示当前 Image2Pdf 的版本号",
+	Run: func(cmd *cobra.Command, args []string) {
+		println("Image2Pdf version", version)
+	},
 }
 
 func main() {

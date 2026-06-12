@@ -19,7 +19,7 @@ const (
 	COUNTERCLOCKWISE float64 = -90 //逆时针旋转90度
 )
 
-func init() {
+func checkMagick() {
 	// 检查系统中是否存在magick命令
 	_, err := exec.LookPath("magick")
 	if err != nil {
@@ -43,6 +43,7 @@ func init() {
 magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
 */
 func Img2Pdf(files []string, dst string, compress bool) {
+	checkMagick()
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}

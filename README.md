@@ -14,10 +14,49 @@
 - **macOS**: 访问 [ImageMagick macOS 下载页面](https://imagemagick.org/script/download.php#macos) 或使用 Homebrew: `brew install imagemagick`
 - **Linux**: 访问 [ImageMagick Linux 下载页面](https://imagemagick.org/script/download.php#linux) 或使用包管理器: `sudo apt-get install imagemagick`
 
+## 📥 快速下载
+
+### 从 GitHub Releases 下载
+
+|平台|架构|下载链接|
+|:---:|:---:|:---:|
+|Linux|amd64|[Image2Pdf_linux_amd64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_linux_amd64)|
+|Linux|arm64|[Image2Pdf_linux_arm64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_linux_arm64)|
+|macOS|amd64|[Image2Pdf_darwin_amd64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_darwin_amd64)|
+|macOS|arm64(AppleSilicon)|[Image2Pdf_darwin_arm64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_darwin_arm64)|
+|Windows|amd64|[Image2Pdf_windows_amd64.exe](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_windows_amd64.exe)|
+|Windows|arm64|[Image2Pdf_windows_arm64.exe](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_windows_arm64.exe)|
+
+**一键下载命令：**
+
+```bash
+# Linux/macOS
+wget https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/') -O Image2Pdf && chmod +x Image2Pdf
+
+# Windows PowerShell (amd64)
+Invoke-WebRequest -Uri "https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_windows_amd64.exe" -OutFile "Image2Pdf.exe"
+
+# Windows PowerShell (arm64)
+Invoke-WebRequest -Uri "https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_windows_arm64.exe" -OutFile "Image2Pdf.exe"
+```
+
 ## 安装
+
+### 从源码构建
 
 ```bash
 go build -o Image2Pdf
+```
+
+### 查看版本
+
+```bash
+# 使用 version 命令
+./Image2Pdf version
+
+# 或使用 --version / -v 标志
+./Image2Pdf --version
+./Image2Pdf -v
 ```
 
 ## 使用方法

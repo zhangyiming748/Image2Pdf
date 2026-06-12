@@ -1,17 +1,11 @@
 # Image2Pdf
 
-<div align="center">
-
 ![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat-square&logo=go)
 ![License](https://img.shields.io/github/license/zhangyiming748/Image2Pdf?style=flat-square)
 ![Release](https://img.shields.io/github/v/release/zhangyiming748/Image2Pdf?style=flat-square&label=release)
 ![Downloads](https://img.shields.io/github/downloads/zhangyiming748/Image2Pdf/total?style=flat-square)
 
-**一个高性能的图片与 PDF 互转命令行工具**
-
-[快速开始](#-快速开始) • [安装指南](#-安装指南) • [使用文档](#-使用文档) • [常见问题](#-常见问题)
-
-</div>
+## 一个高性能的图片与 PDF 互转命令行工具
 
 ---
 
@@ -36,7 +30,7 @@ Image2Pdf 是一个基于 Go 语言开发的跨平台命令行工具，专注于
 ### 从 GitHub Releases 下载
 
 | 平台 | 架构 | 下载链接 |
-|:---:|:---:|:---:|
+| --- | --- | --- |
 | Linux | amd64 | [Image2Pdf_linux_amd64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_linux_amd64) |
 | Linux | arm64 | [Image2Pdf_linux_arm64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_linux_arm64) |
 | macOS | amd64 | [Image2Pdf_darwin_amd64](https://github.com/zhangyiming748/Image2Pdf/releases/latest/download/Image2Pdf_darwin_amd64) |
@@ -201,7 +195,7 @@ image2pdf single [flags]
 #### 参数说明
 
 | 参数 | 简写 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|------|--------|------|
+| --- | --- | --- | --- | --- | --- |
 | `--dir` | `-d` | string | ✅ | - | 包含图片的文件夹绝对路径 |
 | `--compress` | `-c` | bool | ❌ | `true` | 是否启用 PDF 压缩 |
 
@@ -244,7 +238,7 @@ image2pdf multi [flags]
 #### 参数说明
 
 | 参数 | 简写 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|------|--------|------|
+| --- | --- | --- | --- | --- | --- |
 | `--dir` | `-d` | string | ✅ | - | 包含多个子文件夹的根目录绝对路径 |
 | `--compress` | `-c` | bool | ❌ | `true` | 是否启用 PDF 压缩 |
 
@@ -266,7 +260,7 @@ image2pdf multi [flags]
 
 假设目录结构如下：
 
-```
+```text
 /books/
 ├── chapter1/
 │   ├── page1.jpg
@@ -289,7 +283,7 @@ image2pdf multi [flags]
 
 将生成：
 
-```
+```text
 /books/
 ├── chapter1/
 │   ├── page1.jpg
@@ -322,7 +316,7 @@ image2pdf decode [flags]
 #### 参数说明
 
 | 参数 | 简写 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|------|--------|------|
+| --- | --- | --- | --- | --- | --- |
 | `--dir` | `-d` | string | ❌ | `.` | 包含 PDF 文件的根目录绝对路径 |
 
 #### 使用示例
@@ -360,6 +354,7 @@ Image2Pdf 提供两种压缩模式：
 ```
 
 **特点：**
+
 - 使用 JPEG 压缩算法
 - 质量等级：85%
 - 显著减小文件体积（通常可减少 50%-80%）
@@ -373,6 +368,7 @@ Image2Pdf 提供两种压缩模式：
 ```
 
 **特点：**
+
 - 无压缩处理
 - 保持原始图片质量
 - 文件体积较大
@@ -439,6 +435,7 @@ gs --version
 **解决方案**：
 
 1. 确认已启用压缩（默认启用）
+
    ```bash
    ./Image2Pdf single -d /path -c
    ```
@@ -566,10 +563,6 @@ builds:
 
 ---
 
-<div align="center">
-
-**如果这个项目对您有帮助，请考虑给个 ⭐ Star！**
+如果这个项目对您有帮助，请考虑给个 ⭐ Star！
 
 Made with ❤️ using Go
-
-</div>

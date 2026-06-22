@@ -42,7 +42,7 @@ func checkMagick() {
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
 */
-func Img2Pdf(files []string, dst string, compress bool) {
+func Img2Pdf(files []string, dst string, compress bool) error{
 	checkMagick()
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
@@ -69,10 +69,10 @@ func Img2Pdf(files []string, dst string, compress bool) {
 	log.Printf("执行命令:%v\n", cmd.String())
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	log.Printf("执行结果:%v\n", string(b))
-
+	return nil
 }
 
 /*
@@ -80,11 +80,11 @@ func Img2Pdf(files []string, dst string, compress bool) {
 路径下包含的全部图片文件转换成一个pdf文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInFolder(srtDir string, compress bool) {
+func Img2PdfInFolder(srtDir string, compress bool) error{
 	imgFiles := finder.FindAllImagesInRoot(srtDir)
 	if len(imgFiles) == 0 {
 		log.Println("没有找到图片文件!")
-		return
+		return nil
 	}
 	log.Printf("找到的图片文件:%v\n", imgFiles)
 	baseName := filepath.Base(srtDir)
@@ -92,7 +92,7 @@ func Img2PdfInFolder(srtDir string, compress bool) {
 	pdfName := strings.Join([]string{baseName, "pdf"}, ".")
 	pdfPath := filepath.Join(srtDir, pdfName)
 	log.Printf("作为生成pdf的文件名:%v\n", pdfPath)
-	Img2Pdf(imgFiles, pdfPath, compress)
+	return Img2Pdf(imgFiles, pdfPath, compress)
 }
 
 /*
@@ -105,6 +105,9 @@ func Img2PdfInFolder(srtDir string, compress bool) {
 func Img2PdfInRoot(root string, compress bool) {
 	folders := finder.FindAllFolders(root)
 	for _, folder := range folders {
-		Img2PdfInFolder(folder, compress)
+		if err:=Img2PdfInFolder(folder, compress); err != nil {
+			log.Println(err)
+			continue
+		}
 	}
 }

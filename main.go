@@ -111,12 +111,31 @@ func init() {
 		# 使用默认值（当前目录）
 		./Image2Pdf decode
 
+		# 指定目录
+		./Image2Pdf decode -d /path/to/pdf/folder
+
+		# 或使用长格式
+		./Image2Pdf decode --dir /path/to/pdf/folder
+	*/
+
+	// a2j 命令的参数
+	a2jCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含 AVIF 文件的根目录绝对路径（默认为当前目录）")
+	/*
+		# 使用默认值（当前目录）
+		./Image2Pdf a2j
+
+		# 指定目录
+		./Image2Pdf a2j -d /path/to/avif/folder
+
+		# 或使用长格式
+		./Image2Pdf a2j --dir /path/to/avif/folder
 	*/
 
 	// 将子命令添加到根命令
 	rootCmd.AddCommand(singleCmd)
 	rootCmd.AddCommand(multiCmd)
 	rootCmd.AddCommand(decodeCmd)
+	rootCmd.AddCommand(a2jCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 

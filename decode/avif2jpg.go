@@ -24,12 +24,10 @@ func Avif2Jpg(root string) {
 			if err != nil {
 				fmt.Printf("转换失败 %s: %s\n", file, string(b))
 				continue
-			}else{
-				log.Printf("转换成功: %s -> %s\n", file, jpgFile)
-				os.Remove(file)
 			}
 
-			log.Printf("转换完成: %s -> %s\n", file, jpgFile)
+			log.Printf("转换成功: %s -> %s\n", file, jpgFile)
+			os.Remove(file)
 		}
 	}
 }

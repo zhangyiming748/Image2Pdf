@@ -62,6 +62,18 @@ var decodeCmd = &cobra.Command{
 	},
 }
 
+var a2jCmd = &cobra.Command{
+	Use:   "a2j",
+	Short: "将 AVIF 格式图片转换为 JPG 格式",
+	Long:  "给定一个根目录路径，将该目录下所有 .avif 文件转换为同名的 .jpg 文件",
+	Run: func(cmd *cobra.Command, args []string) {
+		if dir == "" {
+			log.Fatal("请提供根目录路径参数 -d 或 --dir")
+		}
+		decode.Avif2Jpg(dir)
+	},
+}
+
 func init() {
 	// single 命令的参数
 	singleCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含图片的文件夹绝对路径")
@@ -99,11 +111,6 @@ func init() {
 		# 使用默认值（当前目录）
 		./Image2Pdf decode
 
-		# 指定目录
-		./Image2Pdf decode -d /path/to/pdf/folder
-
-		# 或使用长格式
-		./Image2Pdf decode --dir /path/to/pdf/folder
 	*/
 
 	// 将子命令添加到根命令

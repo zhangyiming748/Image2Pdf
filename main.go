@@ -16,7 +16,6 @@ func init() {
 var (
 	dir      string
 	compress bool
-	denoise  bool
 	version  = "dev" // 默认版本号,构建时通过 -ldflags 注入
 )
 
@@ -35,7 +34,7 @@ var singleCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供文件夹路径参数 -d 或 --dir")
 		}
-		if err := core.Img2PdfInFolder(dir, compress, denoise); err != nil {
+		if err := core.Img2PdfInFolder(dir, compress); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -49,7 +48,7 @@ var multiCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供根目录路径参数 -d 或 --dir")
 		}
-		core.Img2PdfInRoot(dir, compress, denoise)
+		core.Img2PdfInRoot(dir, compress)
 	},
 }
 
@@ -81,7 +80,6 @@ func init() {
 	// single 命令的参数
 	singleCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含图片的文件夹绝对路径")
 	singleCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
-	singleCmd.Flags().BoolVarP(&denoise, "denoise", "n", true, "转换前对源图去噪,消除 1~2 像素宽的竖向长细线 (默认 true)")
 	singleCmd.MarkFlagRequired("dir")
 	/*
 		# 启用压缩（默认）
@@ -92,15 +90,11 @@ func init() {
 		./Image2Pdf single -d /path/to/images -c=false
 		# 或
 		./Image2Pdf single -d /path/to/images --compress=false
-
-		# 禁用源图去噪
-		./Image2Pdf single -d /path/to/images -n=false
 	*/
 
 	// multi 命令的参数
 	multiCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含多个子文件夹的根目录绝对路径")
 	multiCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
-	multiCmd.Flags().BoolVarP(&denoise, "denoise", "n", true, "转换前对源图去噪,消除 1~2 像素宽的竖向长细线 (默认 true)")
 	multiCmd.MarkFlagRequired("dir")
 	/*
 		# 启用压缩（默认）
@@ -111,9 +105,6 @@ func init() {
 		./Image2Pdf multi -d /path/to/root -c=false
 		# 或
 		./Image2Pdf multi -d /path/to/root --compress=false
-
-		# 禁用源图去噪
-		./Image2Pdf multi -d /path/to/root -n=false
 	*/
 
 	// decode 命令的参数

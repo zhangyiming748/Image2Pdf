@@ -41,9 +41,9 @@ func checkMagick() {
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
-denoise 为 true 时转换前对源图做定向去噪,消除扫描产生的 1~2 像素宽竖向长细线
+转换前做白阈值归一,将纸张底灰与扫描竖线等近白区域合并为纯白
 */
-func Img2Pdf(files []string, dst string, compress bool, denoise bool) error {
+func Img2Pdf(files []string, dst string, compress bool) error {
 	checkMagick()
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
@@ -58,11 +58,10 @@ func Img2Pdf(files []string, dst string, compress bool, denoise bool) error {
 	*/
 	var args []string
 	args = append(args, files...)
-	if denoise {
-		// 横向中值滤波(5x1 窗口),定向消除 1~2 像素宽的竖向长细线:
-		// 竖线在 5 个横向像素中是少数派,被背景替换;宽度 ≥3 像素的文字笔画完整保留
-		args = append(args, "-statistic", "Median", "5x1")
-	}
+	// 白阈值归一,亮度 ≥88%(灰度 ≥225) 的像素全部归为纯白:
+	// 纸张底灰与扫描竖线基本都在 RGB 235 左右及以上,合并为同一白色后线迹对比消失;
+	// 同时保护 88% 以下的浅色内容(淡印章/铅笔字等),深色文字不受影响
+	args = append(args, "-white-threshold", "88%")
 	if compress {
 		args = append(args, "-quality", "85")
 		args = append(args, "-compress", "JPEG")
@@ -86,7 +85,7 @@ func Img2Pdf(files []string, dst string, compress bool, denoise bool) error {
 路径下包含的全部图片文件转换成一个pdf文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInFolder(srtDir string, compress bool, denoise bool) error {
+func Img2PdfInFolder(srtDir string, compress bool) error {
 	imgFiles := finder.FindAllImagesInRoot(srtDir)
 	if len(imgFiles) == 0 {
 		log.Println("没有找到图片文件!")
@@ -98,7 +97,7 @@ func Img2PdfInFolder(srtDir string, compress bool, denoise bool) error {
 	pdfName := strings.Join([]string{baseName, "pdf"}, ".")
 	pdfPath := filepath.Join(srtDir, pdfName)
 	log.Printf("作为生成pdf的文件名:%v\n", pdfPath)
-	return Img2Pdf(imgFiles, pdfPath, compress, denoise)
+	return Img2Pdf(imgFiles, pdfPath, compress)
 }
 
 /*
@@ -108,10 +107,10 @@ func Img2PdfInFolder(srtDir string, compress bool, denoise bool) error {
 全部图片文件转换成一个 pdf 文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInRoot(root string, compress bool, denoise bool) {
+func Img2PdfInRoot(root string, compress bool) {
 	folders := finder.FindAllFolders(root)
 	for _, folder := range folders {
-		if err := Img2PdfInFolder(folder, compress, denoise); err != nil {
+		if err := Img2PdfInFolder(folder, compress); err != nil {
 			log.Println(err)
 			continue
 		}

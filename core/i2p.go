@@ -41,7 +41,7 @@ func checkMagick() {
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
-转换前做白阈值归一,将纸张底灰与扫描竖线等近白区域合并为纯白
+转换前定向消除扫描竖向细线并做白阈值归一,将纸张底灰等近白区域合并为纯白
 */
 func Img2Pdf(files []string, dst string, compress bool) error {
 	checkMagick()
@@ -58,10 +58,14 @@ func Img2Pdf(files []string, dst string, compress bool) error {
 	*/
 	var args []string
 	args = append(args, files...)
-	// 白阈值归一,亮度 ≥88%(灰度 ≥225) 的像素全部归为纯白:
-	// 纸张底灰与扫描竖线基本都在 RGB 235 左右及以上,合并为同一白色后线迹对比消失;
-	// 同时保护 88% 以下的浅色内容(淡印章/铅笔字等),深色文字不受影响
-	args = append(args, "-white-threshold", "88%")
+	// 第一步:横向中值滤波(9x1 窗口)结构性消除竖向细线:
+	// 竖线渐变区可下探至 RGB 215 左右,亮度上无法用阈值追平;
+	// 中值滤波按"窗口内少数派"原则消除宽度 ≤4 像素的竖线,与线的明暗无关
+	args = append(args, "-statistic", "Median", "9x1")
+	// 第二步:白阈值归一,各通道亮度 ≥85%(灰度 ≥217) 的像素全部归为纯白:
+	// 纸张底灰(RGB 227~240)合并为同一白色,竖线像素已被第一步替换为背景值随之归白;
+	// 阈值逐通道生效,略偏色的线也能完全归白;同时保护 85% 以下的浅色内容,深色文字不受影响
+	args = append(args, "-white-threshold", "85%")
 	if compress {
 		args = append(args, "-quality", "85")
 		args = append(args, "-compress", "JPEG")

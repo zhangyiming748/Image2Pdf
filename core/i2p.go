@@ -54,27 +54,32 @@ func checkMagick() {
 /*
 给定一组 jpg/png 图片路径，生成一个 pdf 文件
 magick convert /path/to/image1.jpg /path/to/image2.jpg /path/to/image3.jpg output.pdf
-转换前定向消除扫描竖向细线并做白阈值归一,将纸张底灰等近白区域合并为纯白
+clean 为 true 时转换前定向消除扫描竖向细线并做白阈值归一,将纸张底灰等近白区域合并为纯白;
+为 false 时保持默认转换参数,不做任何清理
 */
-func Img2Pdf(files []string, dst string, compress bool) error {
+func Img2Pdf(files []string, dst string, compress bool, clean bool) error {
 	checkMagick()
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
-	// 逐页去除竖向黑线:遮罩合成(-composite)要求每条命令只处理一张图,
-	// 因此先在临时目录生成净化后的页面,再统一合成 pdf
-	tmpDir, err := os.MkdirTemp("", "i2p-*")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmpDir)
 	var args []string
-	for i, file := range files {
-		cleaned := filepath.Join(tmpDir, fmt.Sprintf("page_%05d.png", i))
-		if err = removeVerticalLines(file, cleaned); err != nil {
+	if clean {
+		// 逐页去除竖向黑线:遮罩合成(-composite)要求每条命令只处理一张图,
+		// 因此先在临时目录生成净化后的页面,再统一合成 pdf
+		tmpDir, err := os.MkdirTemp("", "i2p-*")
+		if err != nil {
 			return err
 		}
-		args = append(args, cleaned)
+		defer os.RemoveAll(tmpDir)
+		for i, file := range files {
+			cleaned := filepath.Join(tmpDir, fmt.Sprintf("page_%05d.png", i))
+			if err = removeVerticalLines(file, cleaned); err != nil {
+				return err
+			}
+			args = append(args, cleaned)
+		}
+	} else {
+		args = append(args, files...)
 	}
 	if compress {
 		args = append(args, "-quality", "85")
@@ -140,7 +145,7 @@ func removeVerticalLines(src, dst string) error {
 路径下包含的全部图片文件转换成一个pdf文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInFolder(srtDir string, compress bool) error {
+func Img2PdfInFolder(srtDir string, compress bool, clean bool) error {
 	imgFiles := finder.FindAllImagesInRoot(srtDir)
 	if len(imgFiles) == 0 {
 		log.Println("没有找到图片文件!")
@@ -152,7 +157,7 @@ func Img2PdfInFolder(srtDir string, compress bool) error {
 	pdfName := strings.Join([]string{baseName, "pdf"}, ".")
 	pdfPath := filepath.Join(srtDir, pdfName)
 	log.Printf("作为生成pdf的文件名:%v\n", pdfPath)
-	return Img2Pdf(imgFiles, pdfPath, compress)
+	return Img2Pdf(imgFiles, pdfPath, compress, clean)
 }
 
 /*
@@ -162,10 +167,10 @@ func Img2PdfInFolder(srtDir string, compress bool) error {
 全部图片文件转换成一个 pdf 文件
 并且保存到同一个文件夹下 而且与文件夹同名
 */
-func Img2PdfInRoot(root string, compress bool) {
+func Img2PdfInRoot(root string, compress bool, clean bool) {
 	folders := finder.FindAllFolders(root)
 	for _, folder := range folders {
-		if err := Img2PdfInFolder(folder, compress); err != nil {
+		if err := Img2PdfInFolder(folder, compress, clean); err != nil {
 			log.Println(err)
 			continue
 		}

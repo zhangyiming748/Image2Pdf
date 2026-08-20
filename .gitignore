@@ -4,3 +4,5 @@
 image2pdf
 image2pdf.exe
 *.jpg
+.gocache
+

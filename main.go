@@ -16,6 +16,7 @@ func init() {
 var (
 	dir      string
 	compress bool
+	clean    bool
 	version  = "dev" // 默认版本号,构建时通过 -ldflags 注入
 )
 
@@ -34,7 +35,7 @@ var singleCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供文件夹路径参数 -d 或 --dir")
 		}
-		if err := core.Img2PdfInFolder(dir, compress); err != nil {
+		if err := core.Img2PdfInFolder(dir, compress, clean); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -48,7 +49,7 @@ var multiCmd = &cobra.Command{
 		if dir == "" {
 			log.Fatal("请提供根目录路径参数 -d 或 --dir")
 		}
-		core.Img2PdfInRoot(dir, compress)
+		core.Img2PdfInRoot(dir, compress, clean)
 	},
 }
 
@@ -80,11 +81,15 @@ func init() {
 	// single 命令的参数
 	singleCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含图片的文件夹绝对路径")
 	singleCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
+	singleCmd.Flags().BoolVarP(&clean, "clean", "C", false, "是否启用清理:定向去除扫描竖向黑线并将底灰归一为纯白 (默认 false)")
 	singleCmd.MarkFlagRequired("dir")
 	/*
-		# 启用压缩（默认）
+		# 默认转换,不做清理
 		./Image2Pdf single -d /path/to/images
-		./Image2Pdf single -d /path/to/images -c
+
+		# 启用清理:显式写 -C/--clean 或附带 =true
+		./Image2Pdf single -d /path/to/images -C
+		./Image2Pdf single -d /path/to/images --clean=true
 
 		# 禁用压缩
 		./Image2Pdf single -d /path/to/images -c=false
@@ -95,11 +100,15 @@ func init() {
 	// multi 命令的参数
 	multiCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含多个子文件夹的根目录绝对路径")
 	multiCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
+	multiCmd.Flags().BoolVarP(&clean, "clean", "C", false, "是否启用清理:定向去除扫描竖向黑线并将底灰归一为纯白 (默认 false)")
 	multiCmd.MarkFlagRequired("dir")
 	/*
-		# 启用压缩（默认）
+		# 默认转换,不做清理
 		./Image2Pdf multi -d /path/to/root
-		./Image2Pdf multi -d /path/to/root -c
+
+		# 启用清理:显式写 -C/--clean 或附带 =true
+		./Image2Pdf multi -d /path/to/root -C
+		./Image2Pdf multi -d /path/to/root --clean=true
 
 		# 禁用压缩
 		./Image2Pdf multi -d /path/to/root -c=false

@@ -11,6 +11,6 @@ func init() {
 
 // go test -v -run TestMagick
 func TestMagick(t *testing.T) {
-	Img2PdfInFolder("C:\\Users\\zen\\Downloads\\文档", false)
-	Img2PdfInRoot("C:\\Users\\zen\\Downloads", false)
+	Img2PdfInFolder("C:\\Users\\zen\\Downloads\\文档", false, true)
+	Img2PdfInRoot("C:\\Users\\zen\\Downloads", false, true)
 }

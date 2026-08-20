@@ -77,6 +77,18 @@ var a2jCmd = &cobra.Command{
 	},
 }
 
+var cleanCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "清理目录（包括子目录）下的所有图片",
+	Long:  "给定一个目录路径，将该目录及所有子目录下的图片逐一深度清理（定向去除扫描竖向黑线并将底灰归一为纯白），清理完成后替换原始图片，文件名、路径和位置保持不变",
+	Run: func(cmd *cobra.Command, args []string) {
+		if dir == "" {
+			log.Fatal("请提供目录路径参数 -d 或 --dir")
+		}
+		core.CleanImagesInDir(dir)
+	},
+}
+
 func init() {
 	// single 命令的参数
 	singleCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含图片的文件夹绝对路径")
@@ -142,11 +154,23 @@ func init() {
 		./Image2Pdf a2j --dir /path/to/avif/folder
 	*/
 
+	// clean 命令的参数
+	cleanCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含待清理图片的目录绝对路径")
+	cleanCmd.MarkFlagRequired("dir")
+	/*
+		# 指定目录,递归清理该目录及所有子目录下的图片
+		./Image2Pdf clean -d /path/to/images
+
+		# 或使用长格式
+		./Image2Pdf clean --dir /path/to/images
+	*/
+
 	// 将子命令添加到根命令
 	rootCmd.AddCommand(singleCmd)
 	rootCmd.AddCommand(multiCmd)
 	rootCmd.AddCommand(decodeCmd)
 	rootCmd.AddCommand(a2jCmd)
+	rootCmd.AddCommand(cleanCmd)
 	rootCmd.AddCommand(versionCmd)
 }
 

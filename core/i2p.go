@@ -146,6 +146,62 @@ func removeVerticalLines(src, dst string) error {
 }
 
 /*
+给定一个目录的绝对路径,将该目录下(包括所有子目录)的全部图片逐一深度清理:
+定向去除扫描竖向黑线并将底灰归一为纯白。
+每张图先在原目录生成同后缀的临时文件,清理成功后删除原始图片,
+再把临时文件重命名为原始文件名,路径和位置保持不变;单张失败时跳过继续处理其余图片
+*/
+func CleanImagesInDir(root string) {
+	checkMagick()
+	files := finder.FindAllImages(root)
+	if len(files) == 0 {
+		log.Println("没有找到图片文件!")
+		return
+	}
+	log.Printf("找到的图片文件:%v\n", files)
+	for _, file := range files {
+		if err := cleanImageInPlace(file); err != nil {
+			log.Printf("清理失败 %s: %v\n", file, err)
+			continue
+		}
+		log.Printf("清理完成: %s\n", file)
+	}
+}
+
+/*
+原地清理单张图片:在与原图同目录下创建同后缀临时文件承接清理结果,
+成功后删除原图并将临时文件重命名为原文件名,保留原文件权限;
+任一步骤失败时清理临时文件并返回错误,原图不受影响
+*/
+func cleanImageInPlace(src string) error {
+	ext := filepath.Ext(src)
+	tmp, err := os.CreateTemp(filepath.Dir(src), ".i2p-clean-*"+ext)
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	tmp.Close()
+	if err = removeVerticalLines(src, tmpName); err != nil {
+		os.Remove(tmpName)
+		return err
+	}
+	info, err := os.Stat(src)
+	if err != nil {
+		os.Remove(tmpName)
+		return err
+	}
+	if err = os.Chmod(tmpName, info.Mode().Perm()); err != nil {
+		os.Remove(tmpName)
+		return err
+	}
+	if err = os.Remove(src); err != nil {
+		os.Remove(tmpName)
+		return err
+	}
+	return os.Rename(tmpName, src)
+}
+
+/*
 给定一个文件夹的绝对路径
 路径下包含的全部图片文件转换成一个pdf文件
 并且保存到同一个文件夹下 而且与文件夹同名

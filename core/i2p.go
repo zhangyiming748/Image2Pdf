@@ -1,7 +1,9 @@
 package core
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -17,6 +19,17 @@ const (
 	CLOCKWISE        float64 = 90 //顺时针旋转90度
 	KEEP             float64 = 0
 	COUNTERCLOCKWISE float64 = -90 //逆时针旋转90度
+)
+
+const (
+	// 黑线的最小竖向连续长度(像素)。
+	// 只有竖向延伸达到该长度的深色结构才被认为是"线"并接受中值滤波,
+	// 文字笔画的竖向长度远小于该值,因此不会被误伤。
+	// 600DPI 下 A4 页高约 7000 像素,扫描折痕/阴影线通常贯穿大半个页面;
+	// 若残留较短的黑线可调小该值,若有内容误伤则调大。
+	lineMinRun = 300
+	// 横向中值滤波窗口宽度,可消除宽度不超过窗口一半的竖线
+	medianWindow = 9
 )
 
 func checkMagick() {
@@ -48,24 +61,21 @@ func Img2Pdf(files []string, dst string, compress bool) error {
 	if len(files) == 0 {
 		log.Fatal("没有提供图片文件!")
 	}
-	/*
-		执行
-		magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
-		会警告
-		WARNING: The convert command is deprecated in IMv7, use "magick" instead of "convert" or "magick convert"
-		优化成
-		magick convert Kana\ Hanazawa_15699-68648e6fa935d11e9087209d487438f3.jpg -compress None 1.pdf
-	*/
+	// 逐页去除竖向黑线:遮罩合成(-composite)要求每条命令只处理一张图,
+	// 因此先在临时目录生成净化后的页面,再统一合成 pdf
+	tmpDir, err := os.MkdirTemp("", "i2p-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
 	var args []string
-	args = append(args, files...)
-	// 第一步:横向中值滤波(9x1 窗口)结构性消除竖向细线:
-	// 竖线渐变区可下探至 RGB 215 左右,亮度上无法用阈值追平;
-	// 中值滤波按"窗口内少数派"原则消除宽度 ≤4 像素的竖线,与线的明暗无关
-	args = append(args, "-statistic", "Median", "9x1")
-	// 第二步:白阈值归一,各通道亮度 ≥85%(灰度 ≥217) 的像素全部归为纯白:
-	// 纸张底灰(RGB 227~240)合并为同一白色,竖线像素已被第一步替换为背景值随之归白;
-	// 阈值逐通道生效,略偏色的线也能完全归白;同时保护 85% 以下的浅色内容,深色文字不受影响
-	args = append(args, "-white-threshold", "85%")
+	for i, file := range files {
+		cleaned := filepath.Join(tmpDir, fmt.Sprintf("page_%05d.png", i))
+		if err = removeVerticalLines(file, cleaned); err != nil {
+			return err
+		}
+		args = append(args, cleaned)
+	}
 	if compress {
 		args = append(args, "-quality", "85")
 		args = append(args, "-compress", "JPEG")
@@ -81,6 +91,47 @@ func Img2Pdf(files []string, dst string, compress bool) error {
 		return err
 	}
 	log.Printf("执行结果:%v\n", string(b))
+	return nil
+}
+
+/*
+只消除图中的竖向黑线,不触碰正常文字:
+ 1. 原图 +clone 一份做横向中值滤波(窗口宽度内的竖线被背景取代),作为"净化版";
+ 2. 再生成一张遮罩:灰度化取反后二值化,所有深色像素(线+文字)变白;
+    用 1xN 核做竖向腐蚀,只有竖向连续长度 ≥lineMinRun 的结构能存活,
+    文字笔画远短于该长度全部消失,再竖向膨胀恢复线的完整长度、横向膨胀覆盖线宽;
+ 3. -composite 按遮罩把净化版合成回原图:遮罩白色处(长线)取净化结果,其余像素原样保留。
+
+等价命令:
+magick in.jpg \( +clone -statistic Median 9x1 \) \( +clone -grayscale Rec709Luminance -negate -threshold 25% -morphology Erode 1x300 -morphology Dilate 1x300 -morphology Dilate 9x1 \) -composite out.png
+*/
+func removeVerticalLines(src, dst string) error {
+	verticalKernel := fmt.Sprintf("1x%d", lineMinRun)
+	medianKernel := fmt.Sprintf("%dx1", medianWindow)
+	args := []string{src,
+		// 净化版:横向中值滤波消除竖线
+		"(", "+clone", "-statistic", "Median", medianKernel, ")",
+		// 遮罩:仅保留超长竖向深色结构
+		"(", "+clone",
+		"-grayscale", "Rec709Luminance",
+		"-negate",
+		"-threshold", "25%",
+		"-morphology", "Erode", verticalKernel,
+		"-morphology", "Dilate", verticalKernel,
+		"-morphology", "Dilate", medianKernel,
+		")",
+		"-composite",
+		// 白阈值归一:各通道亮度 ≥85% 的近白底灰合并为纯白,
+		// 此时深色文字已被遮罩保护过,不受中值滤波影响
+		"-white-threshold", "85%",
+		dst,
+	}
+	cmd := exec.Command("magick", args...)
+	log.Printf("执行命令:%v\n", cmd.String())
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("去除竖线失败 %s: %w, %s", src, err, string(b))
+	}
 	return nil
 }
 

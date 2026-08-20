@@ -108,10 +108,15 @@ func Img2Pdf(files []string, dst string, compress bool, clean bool) error {
  3. -composite 按遮罩把净化版合成回原图:遮罩白色处(长线)取净化结果,其余像素原样保留。
 
 等价命令:
-magick in.jpg \( +clone -statistic Median 9x1 \) \( +clone -grayscale Rec709Luminance -negate -threshold 25% -morphology Erode 1x300 -morphology Dilate 1x300 -morphology Dilate 9x1 \) -composite out.png
+magick in.jpg \( +clone -statistic Median 9x1 \) \( +clone -grayscale Rec709Luminance -negate -threshold 25% -morphology Erode Rectangle:1x300 -morphology Dilate Rectangle:1x300 -morphology Dilate Rectangle:9x1 \) -composite out.png
+
+注意:-morphology 的核字符串必须带形状前缀(如 Rectangle:1x300),裸写 1x300 会报
+"unable to parse kernel string";-statistic Median 走的是几何参数解析,裸写 9x1 即可
 */
 func removeVerticalLines(src, dst string) error {
-	verticalKernel := fmt.Sprintf("1x%d", lineMinRun)
+	// 形态学核需带 Rectangle: 前缀;中值滤波的窗口参数则保持裸几何格式
+	verticalKernel := fmt.Sprintf("Rectangle:1x%d", lineMinRun)
+	morphDilateKernel := fmt.Sprintf("Rectangle:%dx1", medianWindow)
 	medianKernel := fmt.Sprintf("%dx1", medianWindow)
 	args := []string{src,
 		// 净化版:横向中值滤波消除竖线
@@ -123,7 +128,7 @@ func removeVerticalLines(src, dst string) error {
 		"-threshold", "25%",
 		"-morphology", "Erode", verticalKernel,
 		"-morphology", "Dilate", verticalKernel,
-		"-morphology", "Dilate", medianKernel,
+		"-morphology", "Dilate", morphDilateKernel,
 		")",
 		"-composite",
 		// 白阈值归一:各通道亮度 ≥85% 的近白底灰合并为纯白,

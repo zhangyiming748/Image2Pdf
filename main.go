@@ -113,7 +113,6 @@ func init() {
 	multiCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含多个子文件夹的根目录绝对路径")
 	multiCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
 	multiCmd.Flags().BoolVarP(&clean, "clean", "C", false, "是否启用清理:定向去除扫描竖向黑线并将底灰归一为纯白 (默认 false)")
-	multiCmd.MarkFlagRequired("dir")
 	/*
 		# 默认转换,不做清理
 		./Image2Pdf multi -d /path/to/root
@@ -155,9 +154,11 @@ func init() {
 	*/
 
 	// clean 命令的参数
-	cleanCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含待清理图片的目录绝对路径")
-	cleanCmd.MarkFlagRequired("dir")
+	cleanCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含待清理图片的目录绝对路径（默认为当前目录）")
 	/*
+		# 使用默认值（当前目录）
+		./Image2Pdf clean
+
 		# 指定目录,递归清理该目录及所有子目录下的图片
 		./Image2Pdf clean -d /path/to/images
 

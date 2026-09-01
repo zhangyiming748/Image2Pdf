@@ -61,6 +61,7 @@ func Pdf2ImgInFolder(pdf string) {
 	args := []string{}
 	args = append(args, "-density", "300")
 	args = append(args, pdfFile)
+	args = append(args, "-scene", "1")
 	args = append(args, outputPattern)
 	cmd := exec.Command("magick", args...)
 	log.Printf("执行命令:%v\n", cmd.String())

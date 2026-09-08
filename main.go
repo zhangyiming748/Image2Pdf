@@ -25,6 +25,13 @@ var rootCmd = &cobra.Command{
 	Short:   "图片转 PDF 工具",
 	Long:    "Image2Pdf 是一个用于将一组图片合并生成单个 PDF 文件的命令行工具",
 	Version: version,
+	// 仅写主命令(不带子命令)时,默认执行 multi 的行为
+	Run: func(cmd *cobra.Command, args []string) {
+		if dir == "" {
+			log.Fatal("请提供根目录路径参数 -d 或 --dir")
+		}
+		core.Img2PdfInRoot(dir, compress, clean)
+	},
 }
 
 var singleCmd = &cobra.Command{
@@ -164,6 +171,21 @@ func init() {
 
 		# 或使用长格式
 		./Image2Pdf clean --dir /path/to/images
+	*/
+
+	// 根命令的参数:与 multi 保持一致,未指定子命令时按 multi 默认参数执行
+	rootCmd.Flags().StringVarP(&dir, "dir", "d", ".", "包含多个子文件夹的根目录绝对路径")
+	rootCmd.Flags().BoolVarP(&compress, "compress", "c", true, "是否压缩 PDF 文件大小 (默认 true)")
+	rootCmd.Flags().BoolVarP(&clean, "clean", "C", false, "是否启用清理:定向去除扫描竖向黑线并将底灰归一为纯白 (默认 false)")
+	/*
+		# 仅写主命令且不带任何参数,等价于 multi 的默认行为(处理当前目录)
+		./Image2Pdf
+
+		# 等价于 ./Image2Pdf multi -d /path/to/root
+		./Image2Pdf -d /path/to/root
+
+		# 启用清理并禁用压缩
+		./Image2Pdf -d /path/to/root -C -c=false
 	*/
 
 	// 将子命令添加到根命令

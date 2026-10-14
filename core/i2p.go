@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 
 	"github.com/zhangyiming748/finder"
@@ -236,4 +237,67 @@ func Img2PdfInRoot(root string, compress bool, clean bool) {
 			continue
 		}
 	}
+}
+
+/*
+给定一个根目录的绝对路径,递归查找该目录下(包括所有子目录)的全部 PDF 文件,
+按路径字典序依次合并成一个 PDF 文件:第一个 PDF 的页面在前,其余依次追加。
+使用 Ghostscript 的 pdfwrite 设备合并,保留原始矢量内容,不做栅格化。
+dst 为空时默认输出到根目录下的 merged.pdf;
+若输出文件位于根目录内,收集输入时会自动跳过它,避免重复运行时把上一次的合并结果再次并入
+*/
+func MergePdfsInRoot(root string, dst string) error {
+	gs, err := lookGhostscript()
+	if err != nil {
+		return err
+	}
+	if dst == "" {
+		dst = filepath.Join(root, "merged.pdf")
+	}
+	absDst, err := filepath.Abs(dst)
+	if err != nil {
+		return err
+	}
+	var inputs []string
+	for _, file := range finder.FindAllFiles(root) {
+		if !strings.EqualFold(filepath.Ext(file), ".pdf") {
+			continue
+		}
+		if abs, err := filepath.Abs(file); err == nil && abs == absDst {
+			continue
+		}
+		inputs = append(inputs, file)
+	}
+	if len(inputs) == 0 {
+		log.Println("没有找到 PDF 文件!")
+		return nil
+	}
+	sort.Strings(inputs)
+	log.Printf("找到的 PDF 文件:%v\n", inputs)
+	args := []string{"-dBATCH", "-dNOPAUSE", "-q", "-sDEVICE=pdfwrite", "-sOutputFile=" + dst}
+	args = append(args, inputs...)
+	cmd := exec.Command(gs, args...)
+	log.Printf("执行命令:%v\n", cmd.String())
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("合并 PDF 失败: %w, %s", err, string(b))
+	}
+	log.Printf("合并完成: %v (共 %d 个文件)\n", dst, len(inputs))
+	return nil
+}
+
+/*
+按操作系统返回可用的 Ghostscript 命令路径:
+Windows 使用控制台版 gswin64c,macOS/Linux 使用 gs
+*/
+func lookGhostscript() (string, error) {
+	name := "gs"
+	if runtime.GOOS == "windows" {
+		name = "gswin64c"
+	}
+	path, err := exec.LookPath(name)
+	if err != nil {
+		return "", fmt.Errorf("系统中未找到 %s 命令,请先安装 Ghostscript: https://www.ghostscript.com/releases/gsdnld.html", name)
+	}
+	return path, nil
 }
